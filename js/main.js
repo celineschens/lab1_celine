@@ -7,19 +7,14 @@ $(document).ready(function () {
     minZoom: 1,
   });
 
-  L.tileLayer(
-    "https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token={accessToken}",
-    {
-      attribution:
-        'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
-      maxZoom: 18,
-      id: "mapbox/streets-v11",
-      tileSize: 512,
-      zoomOffset: -1,
-      accessToken:
-        "pk.eyJ1IjoiY2VsaW5lY2hlbiIsImEiOiJjazVqejNtbTIwOHB6M3BvN21yYjVubGQxIn0.VD74-y4auYwGAVbmRpG2Ng",
-    }
-  ).addTo(map);
+  var Jawg_Dark = L.tileLayer('https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
+    attribution: '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    minZoom: 0,
+    maxZoom: 22,
+    subdomains: 'abcd',
+    accessToken: 'Xw25n79i7BUNCjsYEUDCO3N251UUuXW1cJlUZ8cfNapPY8SgpJ6uiuHmVdELwkg0'
+  });
+  Jawg_Dark.addTo(map);
 
   var s_light_style = {
     radius: 8,
@@ -151,7 +146,7 @@ $(document).ready(function () {
   } // end updatePropSymbols
 
   function calcPropRadius(attributeValue) {
-    var scaleFactor = 5,
+    var scaleFactor = .01,
       area = attributeValue * scaleFactor;
 
     return Math.sqrt(area / Math.PI);

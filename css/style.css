@@ -3,18 +3,30 @@ body {
 }
 
 #wrapper {
-  width: 960px;
-  margin: 15px auto;
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  width: 100%;
 }
 
-#datepicker {
-  
+#mapid {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height:100%;
+  width: 100%;
+}
+
+
+/* #wrapper {
+  width: 960px;
+  margin: 15px auto;
 }
 
 #mapid { 
   height: 450px;
   margin: 15px auto;
-}
+} */
 
 .legend, .temporal-legend {
   padding: 6px 10px;
@@ -47,4 +59,11 @@ body {
   position: absolute;
   right: 8px;
   padding-bottom: 10px;
+}
+
+.leaflet-popup-tip,
+.leaflet-popup-content-wrapper {
+    background: #100e17;
+    color: white;
+    padding: 5px;
 }
