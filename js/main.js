@@ -5,6 +5,12 @@ $(document).ready(function () {
     center: [20, 0],
     zoom: 2,
     minZoom: 1,
+    // timeDimension: true,
+    // timeDimensionOptions: {
+    //     timeInterval: "2020-01-22/2020-09-28",
+    //     period: "P1D"
+    // },
+    // timeDimensionControl: true,
   });
 
   var Jawg_Dark = L.tileLayer('https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
@@ -16,6 +22,39 @@ $(document).ready(function () {
   });
   Jawg_Dark.addTo(map);
 
+// create the sidebar instance and add it to the map
+var sidebar = L.control.sidebar({ container: 'sidebar' })
+.addTo(map)
+.open('home');
+
+// add panels dynamically to the sidebar
+sidebar
+.addPanel({
+    id:   'js-api',
+    tab:  '<i class="fa fa-gear"></i>',
+    title: 'JS API',
+    pane: '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
+})
+// add a tab with a click callback, initially disabled
+.addPanel({
+    id:   'mail',
+    tab:  '<i class="fa fa-envelope"></i>',
+    title: 'Messages',
+    button: function() { alert('opened via JS callback') },
+    disabled: true,
+})
+
+// be notified when a panel is opened
+sidebar.on('content', function (ev) {
+switch (ev.id) {
+    case 'autopan':
+    sidebar.options.autopan = true;
+    break;
+    default:
+    sidebar.options.autopan = false;
+}
+});
+
   var s_light_style = {
     radius: 8,
     fillColor: "#ff7800",
@@ -24,19 +63,6 @@ $(document).ready(function () {
     opacity: 1,
     fillOpacity: 0.8,
   };
-
-  /*   function onEachFeature(feature,layer) {
-    //no property named popupcontent; instead, create html string with all properties
-    var popupContent = "";
-    if (feature.properties){
-      //loop to add feature property names and values to html string
-      for (var property in feature.properties){
-        popupContent += "<p>" + property + ": " + feature.properties[property] + "</p>"
-      }
-      layer.bindPopup(popupContent)
-      console.log(success);
-    }
-  } */
 
   $.ajax("data/time_series_covid19_confirmed_global.geojson")
     .done(function (data) {
@@ -80,7 +106,7 @@ $(document).ready(function () {
           if (properties[attribute] > max) {
             max = properties[attribute];
           }
-          console.log(min);
+          //console.log(timestamps);
         }
       }
     }
