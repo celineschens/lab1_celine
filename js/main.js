@@ -149,12 +149,12 @@ switch (ev.id) {
         props["Province/State"] !== null
           ? "<b>" +
             String(props[timestamp]) +
-            " cases</b><br>" +
+            " cases in the </b><br>" +
             "<i>" +
             props["Province/State"] +
             ", " +
             props["Country/Region"] +
-            "</i> in </i>" +
+            "</i> on </i>" +
             timestamp +
             "</i>"
           : "<b>" +
@@ -197,6 +197,7 @@ switch (ev.id) {
         roundNumber((max - min) / 2),
         roundNumber(max),
       ];
+      console.log(classes);
       var legendCircle;
       var lastRadius = 0;
       var currentRadius;
@@ -237,7 +238,7 @@ switch (ev.id) {
         lastRadius = currentRadius;
       }
 
-      //$(legendContainer).append(symbolsContainer);
+      $(legendContainer).append(symbolsContainer);
 
       return legendContainer;
     };
