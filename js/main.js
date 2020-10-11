@@ -13,47 +13,56 @@ $(document).ready(function () {
     // timeDimensionControl: true,
   });
 
-  var Jawg_Dark = L.tileLayer('https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}', {
-    attribution: '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    minZoom: 0,
-    maxZoom: 22,
-    subdomains: 'abcd',
-    accessToken: 'Xw25n79i7BUNCjsYEUDCO3N251UUuXW1cJlUZ8cfNapPY8SgpJ6uiuHmVdELwkg0'
-  });
+  var Jawg_Dark = L.tileLayer(
+    "https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}",
+    {
+      attribution:
+        '<a href="http://jawg.io" title="Tiles Courtesy of Jawg Maps" target="_blank">&copy; <b>Jawg</b>Maps</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      minZoom: 0,
+      maxZoom: 22,
+      subdomains: "abcd",
+      accessToken:
+        "Xw25n79i7BUNCjsYEUDCO3N251UUuXW1cJlUZ8cfNapPY8SgpJ6uiuHmVdELwkg0",
+    }
+  );
   Jawg_Dark.addTo(map);
 
-// create the sidebar instance and add it to the map
-var sidebar = L.control.sidebar({ container: 'sidebar' })
-.addTo(map)
-.open('home');
+  // create the sidebar instance and add it to the map
+  var sidebar = L.control
+    .sidebar({ container: "sidebar" })
+    .addTo(map)
+    .open("home");
 
-// add panels dynamically to the sidebar
-sidebar
-.addPanel({
-    id:   'js-api',
-    tab:  '<i class="fa fa-gear"></i>',
-    title: 'JS API',
-    pane: '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
-})
-// add a tab with a click callback, initially disabled
-.addPanel({
-    id:   'mail',
-    tab:  '<i class="fa fa-envelope"></i>',
-    title: 'Messages',
-    button: function() { alert('opened via JS callback') },
-    disabled: true,
-})
+  // add panels dynamically to the sidebar
+  sidebar
+    .addPanel({
+      id: "js-api",
+      tab: '<i class="fa fa-gear"></i>',
+      title: "JS API",
+      pane:
+        '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
+    })
+    // add a tab with a click callback, initially disabled
+    .addPanel({
+      id: "mail",
+      tab: '<i class="fa fa-envelope"></i>',
+      title: "Messages",
+      button: function () {
+        alert("opened via JS callback");
+      },
+      disabled: true,
+    });
 
-// be notified when a panel is opened
-sidebar.on('content', function (ev) {
-switch (ev.id) {
-    case 'autopan':
-    sidebar.options.autopan = true;
-    break;
-    default:
-    sidebar.options.autopan = false;
-}
-});
+  // be notified when a panel is opened
+  sidebar.on("content", function (ev) {
+    switch (ev.id) {
+      case "autopan":
+        sidebar.options.autopan = true;
+        break;
+      default:
+        sidebar.options.autopan = false;
+    }
+  });
 
   var s_light_style = {
     radius: 8,
@@ -63,6 +72,20 @@ switch (ev.id) {
     opacity: 1,
     fillOpacity: 0.8,
   };
+
+  $.getJSON("data/countries.geojson")
+    .then(function (data) {
+      L.geoJson(data, {
+        fillOpacity: 0,
+        color: "#b2b2b2",
+        weight: 0.75,
+      }).addTo(map).on('click', function(){
+        sidebar.toggle();
+      });
+    })
+    .fail(function (err) {
+      console.log(err.responseText);
+    });
 
   $.ajax("data/time_series_covid19_confirmed_global.geojson")
     .done(function (data) {
@@ -77,6 +100,8 @@ switch (ev.id) {
     .fail(function () {
       alert("There has been a problem loading the data.");
     });
+
+
 
   function processData(data) {
     var timestamps = [];
@@ -117,6 +142,12 @@ switch (ev.id) {
     };
   }
 
+  // function createPopupContent(properties,attribute) {
+  //   //add name to popup content string
+  //     var popupContent = "<p class='popup-feature-name'><b>" + properties.["Country/Region"] + ": " + String(props[timestamp]) + "</b></p>";
+
+  // }
+
   function createPropSymbols(timestamps, data) {
     cases = L.geoJson(data, {
       pointToLayer: function (feature, latlng) {
@@ -148,9 +179,7 @@ switch (ev.id) {
       var popupContent =
         props["Province/State"] !== null
           ? "<b>" +
-            String(props[timestamp]) +
-            " cases in the </b><br>" +
-            "<i>" +
+            String(props[timestamp]) + " cases in the </b><br>" + "<i>" +
             props["Province/State"] +
             ", " +
             props["Country/Region"] +
@@ -172,15 +201,19 @@ switch (ev.id) {
   } // end updatePropSymbols
 
   function calcPropRadius(attributeValue) {
-    var scaleFactor = .01,
+    var scaleFactor = 0.01,
       area = attributeValue * scaleFactor;
 
     return Math.sqrt(area / Math.PI);
   } // end calcPropRadius
 
   function createLegend(min, max) {
-    if (min < 5) {
-      min = 5;
+    if (min < 10) {
+      min = 10;
+    }
+
+    if (max > 700,000) {
+      max = 500,000
     }
 
     function roundNumber(inNumber) {
@@ -199,7 +232,7 @@ switch (ev.id) {
       ];
       console.log(classes);
       var legendCircle;
-      var lastRadius = 0;
+      var lastRadius = 100;
       var currentRadius;
       var margin;
 
@@ -216,17 +249,12 @@ switch (ev.id) {
 
         currentRadius = calcPropRadius(classes[i]);
 
-        margin = -currentRadius - lastRadius - 2;
+        margin = -currentRadius - lastRadius + 125;
 
         $(legendCircle).attr(
-          "style",
-          "width: " +
-            currentRadius * 2 +
-            "px; height: " +
-            currentRadius * 2 +
-            "px; margin-left: " +
-            margin +
-            "px"
+          "style", "width: " +
+            currentRadius * 1 + "px; height: " +
+            currentRadius * 1 + "px; margin-left: " + margin + "px"
         );
 
         $(legendCircle).append(
