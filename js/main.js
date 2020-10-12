@@ -195,12 +195,16 @@ function createTitle(){
 
 
   function calcPropRadius(attributeValue) {
-    var scaleFactor = 0.01,
-      area = attributeValue * scaleFactor;
-
-    return Math.sqrt(area / Math.PI);
+    if (attributeValue === 0){
+      return 1
+    }
+    else{
+       var minRadius = 0.1;
+    //flannery compensation formula
+    radius = 1.0083 * Math.pow(attributeValue/50,0.5715) * minRadius
+    return radius;;
   } // end calcPropRadius
-
+  }
   function createLegend(min, max) {
     if (min < 50) {
       min = 50;

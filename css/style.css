@@ -52,8 +52,8 @@ body {
 }
 
 .symbolsContainer {
-  float: right;
-  margin-left: 50px;
+  float: left;
+  margin-left: 100px;
 }
 
 .legendCircle {
