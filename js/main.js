@@ -6,7 +6,7 @@ $(document).ready(function () {
     zoom: 2,
     minZoom: 1,
     maxZoom: 20,
-
+  });
 
   var Jawg_Dark = L.tileLayer(
     "https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}",
