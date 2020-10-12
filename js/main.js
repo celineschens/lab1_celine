@@ -46,12 +46,13 @@ function createTitle(){
 };
   $.getJSON("data/countries.geojson")
     .then(function (data) {
-      L.geoJson(data, {
+      var countryLayer = L.geoJson(data, {
+        onEachFeature: styleCountry,
         fillOpacity: 0,
         color: "#b2b2b2",
-        weight: 0.75,
-      })
-        .addTo(map);
+        weight: 0.5,
+      });
+      countryLayer.addTo(map);
     })
     .fail(function (err) {
       console.log(err.responseText);
@@ -109,12 +110,19 @@ function createTitle(){
     };
   }
 
-  // function createPopupContent(properties,attribute) {
-  //   //add name to popup content string
-  //     var popupContent = "<p class='popup-feature-name'><b>" + properties.["Country/Region"] + ": " + String(props[timestamp]) + "</b></p>";
-
-  // }
-
+ /*  function styleCountry(feature, layer) {
+    layer.on ({
+      mouseover: function (e) {
+        this.openPopup();
+        this.setStyle({ color: "red" });
+      },
+      mouseout: function (e) {
+        this.closePopup();
+        this.setStyle({ color: "#b2b2b2" });
+      },
+    })
+  } */
+  
   function stylePoly(feature, layer) {
     layer.on ({
       mouseover: function (e) {
@@ -125,16 +133,9 @@ function createTitle(){
         this.closePopup();
         this.setStyle({ color: "#537898" });
       },
-      click: function (e) {
-        this.openPopup();
-        this.setStyle({ color: "yellow" });
-      }
     });
   }
 
-  function onMarkerClick(e) {
-    
-  }
   var CasesMarker = {
     fillColor: "#708598",
     color: "#537898",
@@ -149,7 +150,7 @@ function createTitle(){
       },
       onEachFeature: stylePoly,
     }).addTo(map);
-
+    console.log(timestamps);
     function addCOVIDCases () {
       cases.addTo(map);
     }
@@ -178,24 +179,14 @@ function createTitle(){
       var popupContent =
         props["Province/State"] !== null
           ? "<b>" +
-            String(props[timestamp]) +
-            " cases in the </b><br>" +
-            "<i>" +
-            props["Province/State"] +
-            ", " +
-            props["Country/Region"] +
-            "</i> on </i>" +
-            timestamp +
-            "</i>"
-          : "<b>" +
-            String(props[timestamp]) +
-            " cases</b><br>" +
-            "<i>" +
-            props["Country/Region"] +
-            "</i> in </i>" +
-            timestamp +
-            "</i>";
-      //console.log(props);
+            String(props[timestamp]) + " cases in </b><br>" + "<i>" + props["Province/State"] +
+            ", " + props["Country/Region"] + "</i> on </i>" + timestamp + "</i>" 
+            : "<b>" + String(props[timestamp]) + " cases</b><br>" + "<i>" + props["Country/Region"] + "</i> on </i>" + timestamp + "</i>";
+      
+        layer.on('click', function(){
+        sidebar.open('stats');
+        document.getElementById('statscontent').innerHTML = popupContent
+      });
       layer.setRadius(radius);
       layer.bindPopup(popupContent, { offset: new L.Point(0, -radius) });
     });
@@ -330,27 +321,21 @@ function createTitle(){
   } // end createTemporalLegend()
 
     // create the sidebar instance and add it to the map
-    var sidebar = L.control
-    .sidebar({ container: "sidebar" })
-    .addTo(map)
-    .open("home");
+    var sidebar = L.control.sidebar({ 
+      container: "sidebar",
+      autopan: true,
+      })
+      .addTo(map)
+      .open("home");
 
   // add panels dynamically to the sidebar
   sidebar
-    .addPanel({
-      id: "js-api",
-      tab: '<i class="fa fa-gear"></i>',
-      title: "JS API",
-      pane:
-        '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
-    })
     // add a tab with a click callback, initially disabled
     .addPanel({
       id: "stats",
       tab: '<i class="fa fa-line-chart"></i>',
       title: "Statistics",
-      pane:
-      '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
+      pane: '<p> Select a country on the map to see the total number of cases and deaths as of 9/27/2020.</p> <div id="statscontent" style="margin: 15px;">',
     });
 
   // be notified when a panel is opened
