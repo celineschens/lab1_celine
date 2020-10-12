@@ -4,8 +4,8 @@ $(document).ready(function () {
   var map = L.map("mapid", {
     center: [20, 0],
     zoom: 2,
-    minZoom: 1,
-    maxZoom: 20,
+    minZoom: 2,
+    maxZoom: 10,
   });
 
   var Jawg_Dark = L.tileLayer(
@@ -202,12 +202,12 @@ function createTitle(){
   } // end calcPropRadius
 
   function createLegend(min, max) {
-    if (min < 10) {
-      min = 10;
+    if (min < 50) {
+      min = 50;
     }
 
-    if ((max > 700, 000)) {
-      (max = 500,000);
+    if ((max > 7000000)) {
+      (max = 5000000);
     }
 
     function roundNumber(inNumber) {
@@ -226,7 +226,7 @@ function createTitle(){
       ];
       console.log(classes);
       var legendCircle;
-      var lastRadius = 100;
+      var lastRadius = 0;
       var currentRadius;
       var margin;
 
@@ -242,18 +242,9 @@ function createTitle(){
         legendCircle = L.DomUtil.create("div", "legendCircle");
 
         currentRadius = calcPropRadius(classes[i]);
-
-        margin = -currentRadius - lastRadius + 125;
-
+        margin = -currentRadius - lastRadius - 2;
         $(legendCircle).attr(
-          "style",
-          "width: " +
-            currentRadius * 1 +
-            "px; height: " +
-            currentRadius * 1 +
-            "px; margin-left: " +
-            margin +
-            "px"
+          "style", "width: " + currentRadius * 2 + "px; height: " + currentRadius * 2 + "px; margin-left: " + margin + "px"
         );
 
         $(legendCircle).append(

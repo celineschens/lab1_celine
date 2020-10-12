@@ -30,6 +30,12 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.legend.leaflet-control {
+  background: white;
+  height: auto;
+  width: auto;
+}
+
 .legend, .temporal-legend {
   padding: 6px 10px;
   font: 12px/16px Arial, Helvetica, sans-serif;
@@ -46,7 +52,7 @@ body {
 }
 
 .symbolsContainer {
-  float: left;
+  float: right;
   margin-left: 50px;
 }
 
@@ -59,8 +65,8 @@ body {
 
 .legendValue {
   position: absolute;
-  right: 200px;
-  padding-bottom: 10px;
+  right: 15px;
+  padding-bottom: 50px;
 }
 
 .leaflet-popup-tip,
