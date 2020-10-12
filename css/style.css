@@ -1,5 +1,5 @@
 body {
-  font-family: sans-serif;
+  font-family: 'Roboto', sans-serif;
 }
 
 #wrapper {
@@ -15,6 +15,19 @@ body {
   left: 0;
   height:100%;
   width: 100%;
+}
+
+.title-container {
+  width: auto;
+  height: auto;
+  background-color: rgb(0, 0, 0);
+  padding: 5px;
+  line-height: 1px;
+  text-align: center;
+  border: solid white 1.5px;
+  color: white;
+  font-size: 20px;
+  font-family: 'Roboto', sans-serif;
 }
 
 .legend, .temporal-legend {

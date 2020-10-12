@@ -11,11 +11,11 @@
     <link rel="stylesheet" href="css/leaflet-sidebar.css">
     <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-timedimension@1.1.1/dist/leaflet.timedimension.control.min.css" /> -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@900&display=swap" rel="stylesheet"> 
 
   </head>
 
   <body>
-    <!-- optionally define the sidebar content via HTML markup -->
     <div id="sidebar" class="leaflet-sidebar collapsed">
 
       <!-- nav tabs -->
@@ -44,14 +44,17 @@
               <p>Inspired by 
                 <a href="https://coronavirus.jhu.edu/map.html">COVID-19 Dashboard by the Center for Systems Science and Engineering (CSSE) at Johns Hopkins University (JHU)</a>
                 </p>
-              <p><b>Select the other panes for a showcase of each feature.</b></p>
-
               <h2>More sources</h2>
               <ul>
                   <li><a href="https://www.cdc.gov/coronavirus/2019-ncov/cases-updates/index.html">Centers for Disease Control and Prevention</a></li>
                   <li><a href="./halfheight.html">The sidebar adapts to map container size</a></li>
                   <li><a href="./leaflet-0.7.html">Proof that it works with leaflet 0.7</a></li>
               </ul>
+
+              <h2> Filters</h2>
+              <div id="controls" style="margin: 15px;">
+                <button id="toggleButton">Toggle All COVID-19 Cases</button>
+            </div>
           </div>
 
           <div class="leaflet-sidebar-pane" id="autopan">
@@ -67,10 +70,6 @@
                   The autopan behviour is responsive as well.
                   Try opening and closing the sidebar from this pane!
               </p>
-          </div>
-
-          <div class="leaflet-sidebar-pane" id="messages">
-              <h1 class="leaflet-sidebar-header">Messages<span class="leaflet-sidebar-close"><i class="fa fa-caret-left"></i></span></h1>
           </div>
       </div>
   </div>

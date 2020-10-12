@@ -5,13 +5,8 @@ $(document).ready(function () {
     center: [20, 0],
     zoom: 2,
     minZoom: 1,
-    // timeDimension: true,
-    // timeDimensionOptions: {
-    //     timeInterval: "2020-01-22/2020-09-28",
-    //     period: "P1D"
-    // },
-    // timeDimensionControl: true,
-  });
+    maxZoom: 20,
+
 
   var Jawg_Dark = L.tileLayer(
     "https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}",
@@ -27,61 +22,36 @@ $(document).ready(function () {
   );
   Jawg_Dark.addTo(map);
 
-  // create the sidebar instance and add it to the map
-  var sidebar = L.control
-    .sidebar({ container: "sidebar" })
-    .addTo(map)
-    .open("home");
-
-  // add panels dynamically to the sidebar
-  sidebar
-    .addPanel({
-      id: "js-api",
-      tab: '<i class="fa fa-gear"></i>',
-      title: "JS API",
-      pane:
-        '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
-    })
-    // add a tab with a click callback, initially disabled
-    .addPanel({
-      id: "mail",
-      tab: '<i class="fa fa-envelope"></i>',
-      title: "Messages",
-      button: function () {
-        alert("opened via JS callback");
+  // create title and container for title
+function createTitle(){
+  var Title = L.Control.extend({
+      options: {
+          position: 'topright'
       },
-      disabled: true,
-    });
 
-  // be notified when a panel is opened
-  sidebar.on("content", function (ev) {
-    switch (ev.id) {
-      case "autopan":
-        sidebar.options.autopan = true;
-        break;
-      default:
-        sidebar.options.autopan = false;
-    }
+      onAdd: function () {
+          // create the control container with a particular class name
+          var container = L.DomUtil.create('div', 'title-container');
+
+          //add temporal legend div to container
+          $(container).append('<h1><b>Confirmed Covid-19 Cases</h1>');
+
+
+          return container;
+      }
   });
 
-  var s_light_style = {
-    radius: 8,
-    fillColor: "#ff7800",
-    color: "#000",
-    weight: 1,
-    opacity: 1,
-    fillOpacity: 0.8,
-  };
+  map.addControl(new Title());
 
+};
   $.getJSON("data/countries.geojson")
     .then(function (data) {
       L.geoJson(data, {
         fillOpacity: 0,
         color: "#b2b2b2",
         weight: 0.75,
-      }).addTo(map).on('click', function(){
-        sidebar.toggle();
-      });
+      })
+        .addTo(map);
     })
     .fail(function (err) {
       console.log(err.responseText);
@@ -93,15 +63,12 @@ $(document).ready(function () {
       createPropSymbols(info.timestamps, data);
       createLegend(info.min, info.max);
       createSlider(info.timestamps);
-      //cases.push(data);
-
+      createTitle();
       //console.log(info);
     })
     .fail(function () {
       alert("There has been a problem loading the data.");
     });
-
-
 
   function processData(data) {
     var timestamps = [];
@@ -148,27 +115,59 @@ $(document).ready(function () {
 
   // }
 
+  function stylePoly(feature, layer) {
+    layer.on ({
+      mouseover: function (e) {
+        this.openPopup();
+        this.setStyle({ color: "yellow" });
+      },
+      mouseout: function (e) {
+        this.closePopup();
+        this.setStyle({ color: "#537898" });
+      },
+      click: function (e) {
+        this.openPopup();
+        this.setStyle({ color: "yellow" });
+      }
+    });
+  }
+
+  function onMarkerClick(e) {
+    
+  }
+  var CasesMarker = {
+    fillColor: "#708598",
+    color: "#537898",
+    weight: 1,
+    fillOpacity: 0.6,
+  }
+
   function createPropSymbols(timestamps, data) {
     cases = L.geoJson(data, {
       pointToLayer: function (feature, latlng) {
-        return L.circleMarker(latlng, {
-          fillColor: "#708598",
-          color: "#537898",
-          weight: 1,
-          fillOpacity: 0.6,
-        }).on({
-          mouseover: function (e) {
-            this.openPopup();
-            this.setStyle({ color: "yellow" });
-          },
-          mouseout: function (e) {
-            this.closePopup();
-            this.setStyle({ color: "#537898" });
-          },
-        });
+        return L.circleMarker(latlng, CasesMarker)
       },
+      onEachFeature: stylePoly,
     }).addTo(map);
 
+    function addCOVIDCases () {
+      cases.addTo(map);
+    }
+
+    function removeCOVIDCases () {
+      map.removeLayer(cases);
+    }
+
+    document.getElementById("toggleButton").addEventListener ("click", toggleCOVIDCases)
+
+    function toggleCOVIDCases() {
+      if(map.hasLayer(cases)){
+        removeCOVIDCases();
+      } else {
+        addCOVIDCases();
+      }
+    }
+    
     updatePropSymbols(timestamps[0]);
   } // end createPropSymbols()
 
@@ -179,7 +178,9 @@ $(document).ready(function () {
       var popupContent =
         props["Province/State"] !== null
           ? "<b>" +
-            String(props[timestamp]) + " cases in the </b><br>" + "<i>" +
+            String(props[timestamp]) +
+            " cases in the </b><br>" +
+            "<i>" +
             props["Province/State"] +
             ", " +
             props["Country/Region"] +
@@ -200,6 +201,8 @@ $(document).ready(function () {
     });
   } // end updatePropSymbols
 
+
+
   function calcPropRadius(attributeValue) {
     var scaleFactor = 0.01,
       area = attributeValue * scaleFactor;
@@ -212,8 +215,8 @@ $(document).ready(function () {
       min = 10;
     }
 
-    if (max > 700,000) {
-      max = 500,000
+    if ((max > 700, 000)) {
+      (max = 500,000);
     }
 
     function roundNumber(inNumber) {
@@ -252,9 +255,14 @@ $(document).ready(function () {
         margin = -currentRadius - lastRadius + 125;
 
         $(legendCircle).attr(
-          "style", "width: " +
-            currentRadius * 1 + "px; height: " +
-            currentRadius * 1 + "px; margin-left: " + margin + "px"
+          "style",
+          "width: " +
+            currentRadius * 1 +
+            "px; height: " +
+            currentRadius * 1 +
+            "px; margin-left: " +
+            margin +
+            "px"
         );
 
         $(legendCircle).append(
@@ -279,7 +287,7 @@ $(document).ready(function () {
 
     sliderControl.onAdd = function (map) {
       var slider = L.DomUtil.create("input", "range-slider");
-
+      
       $(slider)
         .attr({
           type: "range",
@@ -320,4 +328,40 @@ $(document).ready(function () {
     temporalLegend.addTo(map);
     $(".temporal-legend").text(startTimestamp);
   } // end createTemporalLegend()
+
+    // create the sidebar instance and add it to the map
+    var sidebar = L.control
+    .sidebar({ container: "sidebar" })
+    .addTo(map)
+    .open("home");
+
+  // add panels dynamically to the sidebar
+  sidebar
+    .addPanel({
+      id: "js-api",
+      tab: '<i class="fa fa-gear"></i>',
+      title: "JS API",
+      pane:
+        '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
+    })
+    // add a tab with a click callback, initially disabled
+    .addPanel({
+      id: "stats",
+      tab: '<i class="fa fa-line-chart"></i>',
+      title: "Statistics",
+      pane:
+      '<p>The Javascript API allows to dynamically create or modify the panel state.<p/><p><button onclick="sidebar.enablePanel(\'mail\')">enable mails panel</button><button onclick="sidebar.disablePanel(\'mail\')">disable mails panel</button></p><p><button onclick="addUser()">add user</button></b>',
+    });
+
+  // be notified when a panel is opened
+  sidebar.on("content", function (ev) {
+    switch (ev.id) {
+      case "autopan":
+        sidebar.options.autopan = true;
+        break;
+      default:
+        sidebar.options.autopan = false;
+    }
+  });
+
 });
