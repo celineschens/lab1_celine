@@ -30,6 +30,20 @@ body {
   font-family: 'Roboto', sans-serif;
 }
 
+.slider-container {
+  width: auto;
+  height: 30px;
+  background-color: white;
+  padding: 10px;
+  line-height: 45px;
+  text-align: center;
+  border: solid gray 0.5px;
+}
+
+#next{
+  text-align: center;
+}
+
 .legend.leaflet-control {
   background: white;
   height: auto;
