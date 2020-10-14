@@ -2,7 +2,7 @@ $(document).ready(function () {
   //define variable that can be accessed later
   var cases;
 
-  //add tilelayer
+  //define basemaps as layers
   var Jawg_Dark = L.tileLayer(
     "https://{s}.tile.jawg.io/jawg-dark/{z}/{x}/{y}{r}.png?access-token={accessToken}",
     {
@@ -29,12 +29,14 @@ $(document).ready(function () {
     }
   );
 
+  //call data, define variable that can be accessed in functions related to data
+  //call functions related to the data
+  //error if fail
   $.ajax("data/time_series_covid19_confirmed_global.geojson")
     .done(function (data) {
       var info = processData(data);
       createPropSymbols(info.timestamps, data);
       createLegend(info.min, info.max);
-      //createSlider(info.timestamps);
       createSliderContainer(info.timestamps);
       createTitle();
       //console.log(info);
@@ -43,7 +45,7 @@ $(document).ready(function () {
       alert("There has been a problem loading the data.");
     });
 
-  //create map
+  //create map, define basemap layers
   var map = L.map("mapid", {
     center: [20, 0],
     zoom: 2,
@@ -57,6 +59,7 @@ $(document).ready(function () {
     Terrain: Jawg_Terrain,
   };
 
+  //add layer controls for basemaps
   L.control.layers(baseMaps, null, { position: "topleft" }).addTo(map);
 
   // function to create title
@@ -68,7 +71,7 @@ $(document).ready(function () {
       // create title container
       onAdd: function () {
         var container = L.DomUtil.create("div", "title-container");
-        //add temporal legend div to container
+        //add title text
         $(container).append("<h1><b>Confirmed Covid-19 Cases</h1>");
         return container;
       },
@@ -76,20 +79,7 @@ $(document).ready(function () {
 
     map.addControl(new Title());
   }
-  $.getJSON("data/countries.geojson")
-    .then(function (data) {
-      var countryLayer = L.geoJson(data, {
-        onEachFeature: styleCountry,
-        fillOpacity: 0,
-        color: "#b2b2b2",
-        weight: 0.5,
-      });
-      countryLayer.addTo(map);
-    })
-    .fail(function (err) {
-      console.log(err.responseText);
-    });
-
+ 
   function processData(data) {
     var timestamps = [];
     var min = Infinity;
@@ -100,17 +90,19 @@ $(document).ready(function () {
       // console.log(properties);
 
       for (var attribute in properties) {
-        //if (attribute.match(/^\d/)) {
+        //loop through to get values of cases, not the other columns
         if (
           attribute != "Province/State" &&
           attribute != "Country/Region" &&
           attribute != "Lat" &&
           attribute != "Long"
         ) {
+
+          //push header years to timestamps variable
           if ($.inArray(attribute, timestamps) === -1) {
             timestamps.push(attribute);
           }
-
+          //push min and max values to variables
           if (properties[attribute] < min) {
             min = properties[attribute];
           }
@@ -122,6 +114,7 @@ $(document).ready(function () {
         }
       }
     }
+    //return values
     return {
       timestamps: timestamps,
       min: min,
@@ -129,20 +122,8 @@ $(document).ready(function () {
     };
   }
 
-  /*  function styleCountry(feature, layer) {
-    layer.on ({
-      mouseover: function (e) {
-        this.openPopup();
-        this.setStyle({ color: "red" });
-      },
-      mouseout: function (e) {
-        this.closePopup();
-        this.setStyle({ color: "#b2b2b2" });
-      },
-    })
-  } */
-
-  function stylePoly(feature, layer) {
+  //style circle hover
+  function styleCircle(feature, layer) {
     layer.on({
       mouseover: function (e) {
         this.openPopup();
@@ -155,6 +136,7 @@ $(document).ready(function () {
     });
   }
 
+  //define circle style
   var CasesMarker = {
     fillColor: "#708598",
     color: "#537898",
@@ -162,26 +144,31 @@ $(document).ready(function () {
     fillOpacity: 0.6,
   };
 
+  //create circle symbols
   function createPropSymbols(timestamps, data) {
     cases = L.geoJson(data, {
       pointToLayer: function (feature, latlng) {
         return L.circleMarker(latlng, CasesMarker);
       },
-      onEachFeature: stylePoly,
+      onEachFeature: styleCircle,
     }).addTo(map);
 
+    //function to add cases layer to map
     function addCOVIDCases() {
       cases.addTo(map);
     }
 
+    //function to remove cases layer to map
     function removeCOVIDCases() {
       map.removeLayer(cases);
     }
 
+    //add toggle button event listener
     document
       .getElementById("toggleButton")
       .addEventListener("click", toggleCOVIDCases);
 
+    //function to add or remove cases layer
     function toggleCOVIDCases() {
       if (map.hasLayer(cases)) {
         removeCOVIDCases();
@@ -190,9 +177,11 @@ $(document).ready(function () {
       }
     }
 
+    //call update prop symbols with timestamp values passed
     updatePropSymbols(timestamps[0]);
   } // end createPropSymbols()
 
+  //update prop symbols with popup and adjust size
   function updatePropSymbols(timestamp) {
     cases.eachLayer(function (layer) {
       var props = layer.feature.properties;
@@ -211,13 +200,14 @@ $(document).ready(function () {
             "</i>"
           : "<b>" +
             String(props[timestamp]) +
-            " cases</b><br>" +
+            " cases in </b><br>" + 
             "<i>" +
             props["Country/Region"] +
             "</i> on </i>" +
             timestamp +
             "</i>";
 
+      //open sidebar when circle is clicked
       layer.on("click", function () {
         sidebar.open("stats");
         document.getElementById("statscontent").innerHTML = popupContent;
@@ -227,6 +217,7 @@ $(document).ready(function () {
     });
   } // end updatePropSymbols
 
+  //calculate size of circles
   function calcPropRadius(attributeValue) {
     if (attributeValue === 0) {
       return 1;
@@ -237,9 +228,11 @@ $(document).ready(function () {
       return radius;
     } // end calcPropRadius
   }
+
+  //create legend
   function createLegend(min, max) {
-    if (min < 50) {
-      min = 50;
+    if (min < 100) {
+      min = 100000;
     }
 
     if (max > 7000000) {
@@ -252,6 +245,7 @@ $(document).ready(function () {
 
     var legend = L.control({ position: "bottomright" });
 
+    //define and add elements to legend
     legend.onAdd = function (map) {
       var legendContainer = L.DomUtil.create("div", "legend");
       var symbolsContainer = L.DomUtil.create("div", "symbolsContainer");
@@ -260,20 +254,29 @@ $(document).ready(function () {
         roundNumber((max - min) / 2),
         roundNumber(max),
       ];
-      console.log(classes);
+      //console.log(classes);
+      
+      //define variables to be called
       var legendCircle;
       var lastRadius = 0;
       var currentRadius;
       var margin;
 
-      L.DomEvent.addListener(legendContainer, "mousedown", function (e) {
-        L.DomEvent.stopPropagation(e);
+      //disable pan on legend
+      $(legendContainer).mousedown(function () {
+        map.dragging.disable();
       });
 
+      $(document).mouseup(function () {
+        map.dragging.enable();
+      });
+
+      //add legend title
       $(legendContainer).append(
         "<h2 id='legendTitle'>Covid-19 Cases By Country</h2>"
       );
-
+      
+      //create legend circle and overlay align
       for (var i = 0; i <= classes.length - 1; i++) {
         legendCircle = L.DomUtil.create("div", "legendCircle");
 
@@ -290,8 +293,9 @@ $(document).ready(function () {
             "px"
         );
 
+        //append legend values and format as number
         $(legendCircle).append(
-          "<span class='legendValue'>" + classes[i] + "<span>"
+          "<span class='legendValue'>" + classes[i].toLocaleString() + "<span>"
         );
 
         $(symbolsContainer).append(legendCircle);
@@ -307,22 +311,24 @@ $(document).ready(function () {
     legend.addTo(map);
   } // end createLegend()
 
+  //create slider control with container
   function createSliderContainer(timestamps) {
     var SliderContainer = L.Control.extend({
       options: {
         position: "bottomleft",
       },
-      // create title container
+      // create slider container
       onAdd: function () {
         var sliderbox = L.DomUtil.create("div", "slider-container");
 
+        //add range slider
         $(sliderbox).append('<input class="range-slider" type="range">');
 
-        //next and previous buttons
+        //add next and previous buttons
         $(sliderbox).append('<button class="step" id="previous" title="Previous">Previous</button>');
         $(sliderbox).append('<button class="step" id="next" title="Next">Next</button>');
 
-        //add temporal legend div to container
+        //disable dragging on slider
         $(sliderbox).mousedown(function () {
           map.dragging.disable();
         });
@@ -331,15 +337,15 @@ $(document).ready(function () {
           map.dragging.enable();
         });
 
-        //$(slider-container).append(slider);
         return sliderbox;
-        //return slider;
       },
     });
 
+    //add slidercontainer control to map and update timestamp legend
     map.addControl(new SliderContainer());
     createTemporalLegend(timestamps[0]);
-    //SliderContainer.addTo(map);
+
+    //range-slider attributes
     $(".range-slider")
       .attr({
         type: "range",
@@ -352,6 +358,8 @@ $(document).ready(function () {
         updatePropSymbols(timestamps[$(this).val()]);
         $(".temporal-legend").text(timestamps[this.value]);
       });
+    
+    //add icons to buttons
     $('#next')
       .html('<i class="fas fa-caret-square-right"></i>')
       .on("dblclick", function() {
@@ -369,65 +377,35 @@ $(document).ready(function () {
       //get starting index value
       var index = $('.range-slider').val();
       console.log(index);
+
       //step forward or backward a week depending on button
+      //Note: I couldn't figure how to step forward a week (7) in the index. It returned as a string. But the previous step works as a number for some reason.
       if ($(this).attr('id') == 'next'){
-        index+=7;
+        index++;
         
-          console.log(index);
-          console.log(typeof index);
+          // console.log(index);
+          // console.log(typeof index);
 
           //if index is greater than timestamp length, return to start value
           index = index > (timestamps.length - 1) ? 0 : index;
       } else if ($(this).attr('id') == 'previous'){
           index-=7;
-          console.log(index);
-          console.log(typeof index);
+
+          // console.log(index);
+          // console.log(typeof index);
 
           //if index is negative, return to last value
           index = index < 0 ? (timestamps.length - 1) : index;
       };
 
-      //update slider
+      //update slider and circle symbols with current index step
       $('.range-slider').val(index);
       updatePropSymbols(timestamps[index]);
       $(".temporal-legend").text("Date: " + timestamps[index]);
   });
   }
 
-  /*   function createSlider(timestamps) {
-    var sliderControl = L.control({ position: "bottomleft" });
-
-    sliderControl.onAdd = function (map) {
-      var slider = L.DomUtil.create("input", "range-slider");
-
-      $(slider)
-        .attr({
-          type: "range",
-          max: timestamps.length - 1,
-          min: 0,
-          step: 1,
-          value: 0,
-        })
-        .on("input change", function () {
-          updatePropSymbols(timestamps[$(this).val()]);
-          $(".temporal-legend").text(timestamps[this.value]);
-        });
-
-      $(slider).mousedown(function () {
-        map.dragging.disable();
-      });
-
-      $(document).mouseup(function () {
-        map.dragging.enable();
-      });
-
-      return slider;
-    };
-
-    sliderControl.addTo(map);
-    createTemporalLegend(timestamps[0]);
-  } // end createSliderUI() */
-
+  //create time legend for slider
   function createTemporalLegend(startTimestamp) {
     var temporalLegend = L.control({ position: "bottomleft" });
 
@@ -452,13 +430,14 @@ $(document).ready(function () {
 
   // add panels dynamically to the sidebar
   sidebar
-    // add a tab with a click callback, initially disabled
+    // add a tab to show the popup information
+    //i had more goals for this pane, but i ran out of time. i would have liked to figure out how to show what ranking the country was for most COVID cases. i.e. the US ranked first for confirmed cases in March. i imagine i'd have to figure out how to sum up all the cases for the date selected and do some math. 
     .addPanel({
       id: "stats",
       tab: '<i class="fa fa-line-chart"></i>',
       title: "Statistics",
       pane:
-        '<p> Select a country on the map to see the total number of cases and deaths as of 9/27/2020.</p> <div id="statscontent" style="margin: 15px;">',
+        '<p> Select a country on the map to see the total number of confirmed cases on the date selected.</p> <div id="statscontent" style="margin: 15px;">',
     });
 
   // be notified when a panel is opened
