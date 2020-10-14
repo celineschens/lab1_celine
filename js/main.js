@@ -1,3 +1,14 @@
+//Celine Chen
+//GEOG 574 - UW Madison
+//Lab 1
+//Oct 13, 2020
+
+//code inspired by:
+//https://github.com/uwcart/cartographic-perspectives/tree/master/time-series-prop-map-leaflet
+//https://github.com/Christopher-Pierson/Unit-2 
+//https://github.com/sgrandstrand/leaflet-lab/
+
+
 $(document).ready(function () {
   //define variable that can be accessed later
   var cases;
